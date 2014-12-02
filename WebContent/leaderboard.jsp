@@ -93,9 +93,9 @@
 				GradeWithAttemptScore gwas2 = bookData.get(cm.getId(), gi.getId());
 				Double currScore = 0.0;	
 				
-				if(gwas2 != null && !gwas2.isNullGrade()) {
-					currScore = gwas2.getScoreValue();	 
-				}						
+				if(gwas2 != null && !gwas2.isNullGrade()) {// **Group 6** this can be used to make your own grade variable.(not changed)
+					currScore = gwas2.getScoreValue();
+				}
 				if (gi.getTitle().trim().toLowerCase().equalsIgnoreCase(grade_choice)) {
 					if (sessionUserID.equals(currentUserID)) {
 						scoreToHighlight = currScore;
@@ -164,6 +164,7 @@
 	  							alreadyHighlighted = true;
 	  							out.print("{dataLabels: { enabled: true, style: {fontWeight: 'bold'} }, y:  " + score.toString() + ", color: '"+ user_color + "'}");
 	  						}
+	  						
 	  						else {
 	  							out.print("{y: " + score.toString() + ", color: '" + color + "'}");
 	  						}
@@ -224,7 +225,7 @@
 							groupPadding: 0.1,
 	                           borderWidth: 0,
 	                           borderColor: 'gray',
-	                           shadow: false
+	                           shadow: false 
 	                       }
 	                   },
 					legend: {  enabled: false  },  

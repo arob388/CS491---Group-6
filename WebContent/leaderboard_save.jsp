@@ -74,6 +74,13 @@ if (request.getMethod().equalsIgnoreCase("POST")) {
 	// New persistence object for user-specific settings
 	B2Context b2Context_u = new B2Context(request);
 	
+			// **Group6** Tried to make a new persistence object for student grades 
+	        //so that the grades pulled to the graph would be right.
+	
+	//Get gradebook column value from user-submitted data and add it to the persistence object.
+	//String gradeLabel=  b2Context_u.getRequestParameter("gradebook_column", "").trim();
+	//b2Context_u.setSetting(true, false, "user_gradebook_column" + courseID, gradeLabel);		
+	
 	// Get color value from user-submitted data and add it to the persistence object.
 	b2Context_u.setSetting(true, false, "color", request.getParameter("color"));
 	b2Context_u.setSetting(true, false, "user_color", request.getParameter("user_color"));

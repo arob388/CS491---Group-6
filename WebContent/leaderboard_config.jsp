@@ -19,13 +19,14 @@
 	//This is a test
 	String color_value = "";
 	String user_color_value = "";
+	//String user_gradebook_column = "";//added by **Group 6** working on the student grade column chooser.
 	Id courseID = ctx.getCourseId();
 	String [] level_values = new String[10];
 	String [] level_labels = new String[10];
 	String jsConfigFormPath = PlugInUtil.getUri("dt", "leaderboardblock11", "js/config_form.js");
 	
 		
-	// Create a new persistence object.  Don't save empty fields.
+	// Create a new persistence object.  Don't save empty fields.hi
 	B2Context b2Context = new B2Context(request);
 	b2Context.setSaveEmptyValues(false);
 	
@@ -33,7 +34,11 @@
 	color_value = b2Context.getSetting(true, false, "color");
 	user_color_value = b2Context.getSetting(true, false, "user_color");
 	
-	// Grab previously saved level values and labels
+	//Grab Previously saved gradebook column--added by **Group 6** to try to fix student grade column chooser.
+	
+		//user_color_value = b2Context.getSetting(true, false, "user_color");
+	
+	// Grab previously saved level values and labels--->
 	for(int i = 0; i < 10; i++){
 		level_values[i] = b2Context.getSetting(false, true, "Level_" + (i+1) + "_Points" + courseID.toExternalString() );
 		level_labels[i] = b2Context.getSetting(false, true, "Level_" + (i+1) + "_Labels" + courseID.toExternalString());
@@ -53,7 +58,7 @@
 			<%	
 				//Ensure user accessing configuration is an instructor
 				String sessionUserRole = ctx.getCourseMembership().getRoleAsString();
-				boolean isUserAnInstructor = false;
+				boolean isUserAnInstructor = false;// Group 6 : Changing this value to True changes the student graph but does not fix the grades for the student.
 				if (sessionUserRole.trim().toLowerCase().equals("instructor")) {
 					isUserAnInstructor = true;
 				}	
@@ -226,7 +231,7 @@
 						level_labels[i] = b2Context.getSetting(false, true, "Level_" + (i+1) + "_Labels" + courseID.toExternalString());
 					}
 					
-					//Use the GradebookManager to get the gradebook data
+					//Pull the teacher's GradebookManager to get the gradebook data(need to change)
 					GradebookManager gm = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
 					BookData bookData = gm.getBookData(new BookDataRequest(courseID));
 					List<GradableItem> lgm = gm.getGradebookItems(courseID);
@@ -265,7 +270,57 @@
 				     </bbNG:dataElement>
 				</bbNG:step>
 				
-			<% } else { %>
+			<% } else{ %>
+				<!-- Grade Column Chooser -->
+				<%
+					//Create a string array for the levels and point values from the config file
+					for(int i = 0; i < 10; i++){
+						level_values[i] = b2Context.getSetting(false, true, "Level_" + (i+1) + "_Points" + courseID.toExternalString() );
+						level_labels[i] = b2Context.getSetting(false, true, "Level_" + (i+1) + "_Labels" + courseID.toExternalString());
+					}
+					
+					//Pull the teacher's GradebookManager to get the gradebook data(need to change) 
+					// **Group 6** tried to give the student a ID that would allow access to the gradebook
+					// so that we could pull the grades for our graph, but this was not completed 
+					// sucessfully.
+					GradebookManager gm = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
+					BookData bookData = gm.getBookData(new BookDataRequest(courseID));
+					List<GradableItem> lgm = gm.getGradebookItems(courseID);
+					//It is necessary to execute these two methods to obtain calculated students and extended grade data
+					bookData.addParentReferences();
+					bookData.runCumulativeGrading();
+					//BbList gradeList = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(courseId, CourseMembership.Role.STUDENT);//added by Group 6
+						
+					//Create list of grade columns, so the instructor can select the grade to set for the widget if it is not the overall grade
+					String[] gradeList = new String[lgm.size()];
+					for (int i = 0; i < lgm.size(); i++) {
+						GradableItem gi = (GradableItem) lgm.get(i);
+						gradeList[i] = gi.getTitle();
+					}
+					
+					//Load previous grade column choice. Sets default column as "Total". 
+					String prev_grade_choice = "Total";
+					String prev_grade_string = "";
+					B2Context b2Context_grade = new B2Context(request);
+					prev_grade_choice = b2Context_grade.getSetting(false,true,"gradebook_column" + courseID.toExternalString());
+					if(prev_grade_choice == "") prev_grade_choice = "Total";
+					prev_grade_string = prev_grade_choice + " - (Chosen)"; //selected option on dropdown list 
+				%>
+				<bbNG:step title="Choose Grade Column">
+					 <bbNG:dataElement>
+					 	<bbNG:elementInstructions text=" Choose Grade column to be used." />
+				        <bbNG:selectElement name="gradebook_column"  multiple= "false" >
+				        	
+				   				<bbNG:selectOptionElement value="<%= prev_grade_choice %>" optionLabel="<%= prev_grade_string %>" />
+				        	<% for(int i = 0; i < lgm.size(); i++) { 
+				        		String gradeItem = gradeList[i]; 
+				        		if(!gradeItem.equals(prev_grade_choice)) {%>
+				        		 <bbNG:selectOptionElement value="<%= gradeItem %>" optionLabel="<%= gradeItem %>"/>
+				        	<% } 
+				        	} %>
+				        </bbNG:selectElement>
+				     </bbNG:dataElement>
+				</bbNG:step>
 				<!-- Color Picker -->
 				<bbNG:step title="Everyone else's color">
 					<bbNG:dataElement>
